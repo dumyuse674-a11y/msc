@@ -1,0 +1,2474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #1f2937;
+            color: #f9fafb;
+        }
+        .card {
+            background-color: #374151;
+            border-color: #4b5563;
+            color: #f9fafb;
+        }
+        .sidebar {
+            background-color: #111827;
+            color: #f9fafb;
+        }
+        .hidden { display: none; }
+        .active { background-color: #10b981; color: white; }
+        .kpi-card { transition: transform 0.2s; }
+        .kpi-card:hover { transform: translateY(-2px); }
+        .chat-widget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 350px;
+            height: 500px;
+            background-color: #374151;
+            border: 1px solid #4b5563;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        .chat-header {
+            background-color: #10b981;
+            color: white;
+            padding: 12px;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .chat-messages {
+            height: 380px;
+            overflow-y: auto;
+            padding: 12px;
+        }
+        .chat-input {
+            padding: 12px;
+            border-top: 1px solid #4b5563;
+        }
+        .message {
+            margin-bottom: 8px;
+            padding: 8px 12px;
+            border-radius: 6px;
+        }
+        .message.user {
+            background-color: #10b981;
+            color: white;
+            margin-left: 40px;
+        }
+        .message.bot {
+            background-color: #4b5563;
+            color: #f9fafb;
+            margin-right: 40px;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="sidebar w-64 border-r border-gray-600 p-4">
+            <h1 class="text-xl font-bold mb-6 text-teal-400">Analytics Dashboard</h1>
+            <nav class="space-y-2">
+                <button onclick="showView('overview')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-gray-700 active text-white">Overview</button>
+                <button onclick="showView('analytics')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-gray-700 text-white">Real-time Analytics</button>
+                <button onclick="showView('performance')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-gray-700 text-white">Performance Intelligence</button>
+                <button onclick="showView('content')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-gray-700 text-white">Metric Canvas</button>
+                <button onclick="showView('insights')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-gray-700 text-white">Insights Console</button>
+                <button onclick="showView('notifications')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-gray-700 text-white">Notifications</button>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 overflow-y-auto">
+            <!-- Overview View -->
+            <div id="overview" class="view p-6">
+                <h2 class="text-2xl font-semibold mb-1 text-white">Dashboard Overview</h2>
+                <p class="text-gray-300 mb-6">Key performance indicators and real-time metrics</p>
+
+                <!-- KPI Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                    <div class="kpi-card card p-4 rounded-lg border border-gray-600 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-300">Active Users</p>
+                                <p class="text-2xl font-bold text-white">8,542</p>
+                                <p class="text-sm text-green-400">+12% vs last week</p>
+                            </div>
+                            <div class="text-blue-400 text-2xl">👥</div>
+                        </div>
+                    </div>
+                    <div class="kpi-card card p-4 rounded-lg border border-gray-600 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-300">Monthly Revenue</p>
+                                <p class="text-2xl font-bold text-white">$127,450</p>
+                                <p class="text-sm text-green-400">+8% vs last month</p>
+                            </div>
+                            <div class="text-green-400 text-2xl">💰</div>
+                        </div>
+                    </div>
+                    <div class="kpi-card card p-4 rounded-lg border border-gray-600 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-300">Watch Hours</p>
+                                <p class="text-2xl font-bold text-white">45,230</p>
+                                <p class="text-sm text-green-400">+15% vs last week</p>
+                            </div>
+                            <div class="text-purple-400 text-2xl">⏰</div>
+                        </div>
+                    </div>
+                    <div class="kpi-card card p-4 rounded-lg border border-gray-600 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-300">Content Views</p>
+                                <p class="text-2xl font-bold text-white">156,789</p>
+                                <p class="text-sm text-green-400">+22% vs last week</p>
+                            </div>
+                            <div class="text-red-400 text-2xl">🎬</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="card p-4 rounded-lg border border-gray-600 shadow-sm">
+                        <h3 class="text-lg font-semibold mb-4 text-white">Revenue Trend</h3>
+                        <canvas id="revenueChart" width="400" height="200"></canvas>
+                    </div>
+                    <div class="card p-4 rounded-lg border border-gray-600 shadow-sm">
+                        <h3 class="text-lg font-semibold mb-4 text-white">User Activity</h3>
+                        <canvas id="activityChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics View -->
+            <div id="analytics" class="view p-6 hidden">
+                <h2 class="text-2xl font-semibold mb-1 text-white">Real-time Analytics</h2>
+                <p class="text-gray-300 mb-6">Live streaming metrics and performance data</p>
+
+                <!-- Live Status Bar -->
+                <div class="card p-4 rounded-lg border border-gray-600 shadow-sm mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-white">System Status</h3>
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                            <span class="text-green-400 text-sm">All Systems Operational</span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-blue-400">99.97%</div>
+                            <div class="text-xs text-gray-300">Uptime (30d)</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-green-400">2.3s</div>
+                            <div class="text-xs text-gray-300">Avg Response</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-purple-400">156</div>
+                            <div class="text-xs text-gray-300">Active Regions</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-yellow-400">24/7</div>
+                            <div class="text-xs text-gray-300">Monitoring</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Enhanced KPI Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-3 mb-6">
+                    <div class="kpi-card card p-3 rounded-lg border border-gray-600 shadow-sm">
+                        <div class="flex items-center justify-between mb-2">
+                            <div>
+                                <p class="text-sm text-gray-300">Concurrent Streams</p>
+                                <p class="text-3xl font-bold text-blue-400">2,847</p>
+                            </div>
+                            <div class="text-blue-400 text-2xl">📺</div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-green-400">+5.2% vs yesterday</span>
+                            <span class="text-xs text-gray-400">Peak: 3,124</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card card p-3 rounded-lg border border-gray-600 shadow-sm">
+                        <div class="flex items-center justify-between mb-2">
+                            <div>
+                                <p class="text-sm text-gray-300">Bandwidth Usage</p>
+                                <p class="text-3xl font-bold text-green-400">1.2 TB</p>
+                            </div>
+                            <div class="text-green-400 text-2xl">📊</div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-red-400">+12% vs yesterday</span>
+                            <span class="text-xs text-gray-400">Limit: 2.5 TB</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card card p-3 rounded-lg border border-gray-600 shadow-sm">
+                        <div class="flex items-center justify-between mb-2">
+                            <div>
+                                <p class="text-sm text-gray-300">CDN Requests</p>
+                                <p class="text-3xl font-bold text-purple-400">45.2M</p>
+                            </div>
+                            <div class="text-purple-400 text-2xl">🌐</div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-green-400">+8.1% vs yesterday</span>
+                            <span class="text-xs text-gray-400">Cache Hit: 94%</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card card p-3 rounded-lg border border-gray-600 shadow-sm">
+                        <div class="flex items-center justify-between mb-2">
+                            <div>
+                                <p class="text-sm text-gray-300">Error Rate</p>
+                                <p class="text-3xl font-bold text-red-400">0.03%</p>
+                            </div>
+                            <div class="text-red-400 text-2xl">⚠️</div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-green-400">-0.01% vs yesterday</span>
+                            <span class="text-xs text-gray-400">Target: <0.1%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Real-time Charts Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+                    <div class="card p-3 rounded-lg border border-gray-600 shadow-sm">
+                        <h3 class="text-lg font-semibold mb-4 text-white">Concurrent Streams (Last 24h)</h3>
+                        <canvas id="streamsChart" width="300" height="150"></canvas>
+                    </div>
+                    <div class="card p-3 rounded-lg border border-gray-600 shadow-sm">
+                        <h3 class="text-lg font-semibold mb-4 text-white">Bandwidth Usage (Last 24h)</h3>
+                        <canvas id="bandwidthChart" width="300" height="150"></canvas>
+                    </div>
+                </div>
+
+                <!-- Device & Content Breakdown -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+                    <div class="card p-3 rounded-lg border border-gray-600 shadow-sm">
+                        <h3 class="text-lg font-semibold mb-4 text-white">Device Distribution</h3>
+                        <canvas id="deviceChart" width="300" height="150"></canvas>
+                    </div>
+                    <div class="card p-3 rounded-lg border border-gray-600 shadow-sm">
+                        <h3 class="text-lg font-semibold mb-4 text-white">Content Type Mix</h3>
+                        <canvas id="contentChart" width="300" height="150"></canvas>
+                    </div>
+                </div>
+
+                <!-- Geographic Distribution -->
+                <div class="card p-4 rounded-lg border border-gray-600 shadow-sm mb-6">
+                    <h3 class="text-lg font-semibold mb-4 text-white">Geographic Distribution</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="text-center p-4 bg-gray-700 rounded">
+                            <div class="text-2xl font-bold text-blue-400">42%</div>
+                            <div class="text-sm text-gray-300">North America</div>
+                            <div class="text-xs text-gray-400">1,192 streams</div>
+                        </div>
+                        <div class="text-center p-4 bg-gray-700 rounded">
+                            <div class="text-2xl font-bold text-green-400">31%</div>
+                            <div class="text-sm text-gray-300">Europe</div>
+                            <div class="text-xs text-gray-400">879 streams</div>
+                        </div>
+                        <div class="text-center p-4 bg-gray-700 rounded">
+                            <div class="text-2xl font-bold text-purple-400">27%</div>
+                            <div class="text-sm text-gray-300">Asia Pacific</div>
+                            <div class="text-xs text-gray-400">776 streams</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Forecasts & Predictions -->
+                <div class="card p-4 rounded-lg border border-gray-600 shadow-sm">
+                    <h3 class="text-lg font-semibold mb-4 text-white">AI-Powered Forecasts</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-green-400 mb-2">+$18,500</div>
+                            <p class="text-sm text-gray-300">Revenue Forecast (7d)</p>
+                            <div class="mt-2">
+                                <div class="w-full bg-gray-700 rounded-full h-2">
+                                    <div class="bg-green-400 h-2 rounded-full" style="width: 85%"></div>
+                                </div>
+                                <p class="text-xs text-gray-400 mt-1">85% confidence</p>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-blue-400 mb-2">+1,250</div>
+                            <p class="text-sm text-gray-300">User Growth (7d)</p>
+                            <div class="mt-2">
+                                <div class="w-full bg-gray-700 rounded-full h-2">
+                                    <div class="bg-blue-400 h-2 rounded-full" style="width: 78%"></div>
+                                </div>
+                                <p class="text-xs text-gray-400 mt-1">78% confidence</p>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-red-400 mb-2">2.3%</div>
+                            <p class="text-sm text-gray-300">Churn Risk</p>
+                            <div class="mt-2">
+                                <div class="w-full bg-gray-700 rounded-full h-2">
+                                    <div class="bg-red-400 h-2 rounded-full" style="width: 92%"></div>
+                                </div>
+                                <p class="text-xs text-gray-400 mt-1">92% confidence</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance View -->
+            <div id="performance" class="view p-6 hidden">
+                <h2 class="text-2xl font-semibold mb-1 text-white">Performance Intelligence</h2>
+                <p class="text-gray-300 mb-6">Platform performance insights and benchmarks</p>
+
+                <!-- Performance Health Overview -->
+                <div class="card p-4 rounded-lg border border-gray-600 shadow-sm mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-white">Performance Health Score</h3>
+                        <div class="flex items-center gap-2">
+                            <div class="text-3xl font-bold text-green-400">94</div>
+                            <div class="text-sm text-gray-300">/100</div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="text-center p-3 bg-gray-700 rounded">
+                            <div class="text-xl font-bold text-blue-400">A+</div>
+                            <div class="text-xs text-gray-300">Quality Score</div>
+                        </div>
+                        <div class="text-center p-3 bg-gray-700 rounded">
+                            <div class="text-xl font-bold text-green-400">99.2%</div>
+                            <div class="text-xs text-gray-300">Success Rate</div>
+                        </div>
+                        <div class="text-center p-3 bg-gray-700 rounded">
+                            <div class="text-xl font-bold text-purple-400">1.8s</div>
+                            <div class="text-xs text-gray-300">Avg Load Time</div>
+                        </div>
+                        <div class="text-center p-3 bg-gray-700 rounded">
+                            <div class="text-xl font-bold text-yellow-400">24/7</div>
+                            <div class="text-xs text-gray-300">Monitoring</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Enhanced KPI Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                    <div class="kpi-card card p-4 rounded-lg border border-gray-600 shadow-sm">
+                        <div class="flex items-center justify-between mb-2">
+                            <div>
+                                <p class="text-sm text-gray-300">Playback Quality</p>
+                                <p class="text-3xl font-bold text-green-400">98.5%</p>
+                            </div>
+                            <div class="text-green-400 text-2xl">🎬</div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-green-400">+0.3% vs target</span>
+                            <span class="text-xs text-gray-400">Target: 98%</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card card p-4 rounded-lg border border-gray-600 shadow-sm">
+                        <div class="flex items-center justify-between mb-2">
+                            <div>
+                                <p class="text-sm text-gray-300">Rebuffer Rate</p>
+                                <p class="text-3xl font-bold text-blue-400">0.8%</p>
+                            </div>
+                            <div class="text-blue-400 text-2xl">⏸️</div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-green-400">-0.2% vs yesterday</span>
+                            <span class="text-xs text-gray-400">Target: <1%</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card card p-4 rounded-lg border border-gray-600 shadow-sm">
+                        <div class="flex items-center justify-between mb-2">
+                            <div>
+                                <p class="text-sm text-gray-300">Startup Time</p>
+                                <p class="text-3xl font-bold text-purple-400">2.3s</p>
+                            </div>
+                            <div class="text-purple-400 text-2xl">⚡</div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-green-400">-0.1s vs yesterday</span>
+                            <span class="text-xs text-gray-400">Target: <3s</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card card p-4 rounded-lg border border-gray-600 shadow-sm">
+                        <div class="flex items-center justify-between mb-2">
+                            <div>
+                                <p class="text-sm text-gray-300">Error Rate</p>
+                                <p class="text-3xl font-bold text-red-400">0.2%</p>
+                            </div>
+                            <div class="text-red-400 text-2xl">⚠️</div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-green-400">-0.05% vs yesterday</span>
+                            <span class="text-xs text-gray-400">Target: <0.5%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Performance Metrics Dashboard -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+                    <div class="card p-3 rounded-lg border border-gray-600 shadow-sm">
+                        <h3 class="text-lg font-semibold mb-4 text-white">Quality Metrics Over Time</h3>
+                        <canvas id="qualityChart" width="300" height="150"></canvas>
+                    </div>
+                    <div class="card p-3 rounded-lg border border-gray-600 shadow-sm">
+                        <h3 class="text-lg font-semibold mb-4 text-white">Benchmark Comparison</h3>
+                        <canvas id="benchmarkChart" width="300" height="150"></canvas>
+                    </div>
+                </div>
+
+                <!-- Device Performance Matrix -->
+                <div class="card p-4 rounded-lg border border-gray-600 shadow-sm mb-6">
+                    <h3 class="text-lg font-semibold mb-4 text-white">Device Performance Matrix</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="border-b border-gray-600">
+                                    <th class="text-left p-3 text-white">Device Type</th>
+                                    <th class="text-left p-3 text-white">Success Rate</th>
+                                    <th class="text-left p-3 text-white">Avg Load Time</th>
+                                    <th class="text-left p-3 text-white">Error Rate</th>
+                                    <th class="text-left p-3 text-white">User Satisfaction</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-gray-600">
+                                    <td class="p-3 text-white">📱 Mobile</td>
+                                    <td class="p-3">
+                                        <div class="flex items-center">
+                                            <div class="w-16 bg-gray-700 rounded-full h-2 mr-2">
+                                                <div class="bg-green-400 h-2 rounded-full" style="width: 98%"></div>
+                                            </div>
+                                            <span class="text-green-400 text-xs">98%</span>
+                                        </div>
+                                    </td>
+                                    <td class="p-3 text-white">2.1s</td>
+                                    <td class="p-3 text-green-400">0.1%</td>
+                                    <td class="p-3 text-white">⭐ 4.8/5</td>
+                                </tr>
+                                <tr class="border-b border-gray-600">
+                                    <td class="p-3 text-white">💻 Desktop</td>
+                                    <td class="p-3">
+                                        <div class="flex items-center">
+                                            <div class="w-16 bg-gray-700 rounded-full h-2 mr-2">
+                                                <div class="bg-green-400 h-2 rounded-full" style="width: 99%"></div>
+                                            </div>
+                                            <span class="text-green-400 text-xs">99%</span>
+                                        </div>
+                                    </td>
+                                    <td class="p-3 text-white">1.8s</td>
+                                    <td class="p-3 text-green-400">0.05%</td>
+                                    <td class="p-3 text-white">⭐ 4.9/5</td>
+                                </tr>
+                                <tr class="border-b border-gray-600">
+                                    <td class="p-3 text-white">📺 Smart TV</td>
+                                    <td class="p-3">
+                                        <div class="flex items-center">
+                                            <div class="w-16 bg-gray-700 rounded-full h-2 mr-2">
+                                                <div class="bg-yellow-400 h-2 rounded-full" style="width: 95%"></div>
+                                            </div>
+                                            <span class="text-yellow-400 text-xs">95%</span>
+                                        </div>
+                                    </td>
+                                    <td class="p-3 text-white">3.2s</td>
+                                    <td class="p-3 text-yellow-400">0.8%</td>
+                                    <td class="p-3 text-white">⭐ 4.5/5</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 text-white">🎮 Gaming Console</td>
+                                    <td class="p-3">
+                                        <div class="flex items-center">
+                                            <div class="w-16 bg-gray-700 rounded-full h-2 mr-2">
+                                                <div class="bg-green-400 h-2 rounded-full" style="width: 97%"></div>
+                                            </div>
+                                            <span class="text-green-400 text-xs">97%</span>
+                                        </div>
+                                    </td>
+                                    <td class="p-3 text-white">2.5s</td>
+                                    <td class="p-3 text-green-400">0.3%</td>
+                                    <td class="p-3 text-white">⭐ 4.7/5</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Regional Performance & Alerts -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div class="card p-4 rounded-lg border border-gray-600 shadow-sm">
+                        <h3 class="text-lg font-semibold mb-4 text-white">Regional Performance</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between p-3 bg-gray-700 rounded">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-blue-400">🇺🇸</span>
+                                    <span class="text-white">North America</span>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-green-400 font-semibold">99.5%</div>
+                                    <div class="text-xs text-gray-400">2.1s avg</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-gray-700 rounded">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-green-400">🇪🇺</span>
+                                    <span class="text-white">Europe</span>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-green-400 font-semibold">98.8%</div>
+                                    <div class="text-xs text-gray-400">2.4s avg</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-gray-700 rounded">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-purple-400">🌏</span>
+                                    <span class="text-white">Asia Pacific</span>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-yellow-400 font-semibold">96.2%</div>
+                                    <div class="text-xs text-gray-400">3.1s avg</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card p-4 rounded-lg border border-gray-600 shadow-sm">
+                        <h3 class="text-lg font-semibold mb-4 text-white">Active Alerts & Recommendations</h3>
+                        <div class="space-y-3">
+                            <div class="p-3 bg-yellow-900/30 border border-yellow-600 rounded">
+                                <div class="flex items-start gap-2">
+                                    <span class="text-yellow-400 text-lg">⚠️</span>
+                                    <div>
+                                        <div class="text-white font-semibold">TV Performance Alert</div>
+                                        <div class="text-sm text-gray-300">Smart TV load times above 3s threshold</div>
+                                        <div class="text-xs text-yellow-400 mt-1">Action: Optimize TV app bundle</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-3 bg-green-900/30 border border-green-600 rounded">
+                                <div class="flex items-start gap-2">
+                                    <span class="text-green-400 text-lg">✅</span>
+                                    <div>
+                                        <div class="text-white font-semibold">Mobile Excellence</div>
+                                        <div class="text-sm text-gray-300">Mobile performance exceeds targets</div>
+                                        <div class="text-xs text-green-400 mt-1">Status: Optimal performance</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Enhanced Cohort Analysis -->
+                <div class="card p-4 rounded-lg border border-gray-600 shadow-sm">
+                    <h3 class="text-lg font-semibold mb-4 text-white">Advanced Cohort Analysis</h3>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-md font-semibold mb-3 text-white">Retention Trends</h4>
+                            <canvas id="cohortChart" width="400" height="200"></canvas>
+                        </div>
+                        <div>
+                            <h4 class="text-md font-semibold mb-3 text-white">Cohort Performance Table</h4>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm">
+                                    <thead>
+                                        <tr class="border-b border-gray-600">
+                                            <th class="text-left p-2 text-white">Cohort</th>
+                                            <th class="text-left p-2 text-white">Users</th>
+                                            <th class="text-left p-2 text-white">Day 7</th>
+                                            <th class="text-left p-2 text-white">Day 30</th>
+                                            <th class="text-left p-2 text-white">LTV</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="border-b border-gray-600">
+                                            <td class="p-2 text-white">Jan 2024</td>
+                                            <td class="p-2 text-white">1,250</td>
+                                            <td class="p-2 text-green-400">78%</td>
+                                            <td class="p-2 text-green-400">65%</td>
+                                            <td class="p-2 text-white">$89</td>
+                                        </tr>
+                                        <tr class="border-b border-gray-600">
+                                            <td class="p-2 text-white">Feb 2024</td>
+                                            <td class="p-2 text-white">1,180</td>
+                                            <td class="p-2 text-green-400">82%</td>
+                                            <td class="p-2 text-green-400">68%</td>
+                                            <td class="p-2 text-white">$94</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 text-white">Mar 2024</td>
+                                            <td class="p-2 text-white">1,320</td>
+                                            <td class="p-2 text-green-400">85%</td>
+                                            <td class="p-2 text-green-400">71%</td>
+                                            <td class="p-2 text-white">$98</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content/Metric Canvas View -->
+            <div id="content" class="view p-6 hidden">
+                <h2 class="text-2xl font-semibold mb-1 text-white">Metric Canvas</h2>
+                <p class="text-gray-300 mb-6">Curate custom KPI spark-lines and advanced analytics</p>
+
+                <!-- Canvas Controls -->
+                <div class="card p-4 rounded-lg border border-gray-600 shadow-sm mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-white">Canvas Builder</h3>
+                        <div class="flex gap-2">
+                            <button onclick="addMetric()" class="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700">+ Add Metric</button>
+                            <button onclick="saveCanvas()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Save Canvas</button>
+                            <button onclick="loadCanvas()" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">Load Canvas</button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-sm text-gray-300 mb-1">Time Range</label>
+                            <select class="w-full border border-gray-600 rounded p-2 bg-gray-700 text-white">
+                                <option>Last 7 days</option>
+                                <option>Last 30 days</option>
+                                <option>Last 90 days</option>
+                                <option>Custom range</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-300 mb-1">Granularity</label>
+                            <select class="w-full border border-gray-600 rounded p-2 bg-gray-700 text-white">
+                                <option>Daily</option>
+                                <option>Hourly</option>
+                                <option>Weekly</option>
+                                <option>Monthly</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-300 mb-1">Chart Type</label>
+                            <select class="w-full border border-gray-600 rounded p-2 bg-gray-700 text-white">
+                                <option>Line Chart</option>
+                                <option>Bar Chart</option>
+                                <option>Area Chart</option>
+                                <option>Sparkline</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-300 mb-1">Auto Refresh</label>
+                            <select class="w-full border border-gray-600 rounded p-2 bg-gray-700 text-white">
+                                <option>Off</option>
+                                <option>5 minutes</option>
+                                <option>15 minutes</option>
+                                <option>1 hour</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Metric Library -->
+                <div class="card p-4 rounded-lg border border-gray-600 shadow-sm mb-6">
+                    <h3 class="text-lg font-semibold mb-4 text-white">Available Metrics</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                        <button onclick="selectMetric('active_users')" class="metric-btn p-3 bg-gray-700 rounded border border-gray-600 hover:border-teal-400 text-white text-sm">
+                            👥 Active Users
+                        </button>
+                        <button onclick="selectMetric('revenue')" class="metric-btn p-3 bg-gray-700 rounded border border-gray-600 hover:border-teal-400 text-white text-sm">
+                            💰 Revenue
+                        </button>
+                        <button onclick="selectMetric('watch_hours')" class="metric-btn p-3 bg-gray-700 rounded border border-gray-600 hover:border-teal-400 text-white text-sm">
+                            ⏰ Watch Hours
+                        </button>
+                        <button onclick="selectMetric('streams')" class="metric-btn p-3 bg-gray-700 rounded border border-gray-600 hover:border-teal-400 text-white text-sm">
+                            📺 Streams
+                        </button>
+                        <button onclick="selectMetric('bandwidth')" class="metric-btn p-3 bg-gray-700 rounded border border-gray-600 hover:border-teal-400 text-white text-sm">
+                            📊 Bandwidth
+                        </button>
+                        <button onclick="selectMetric('errors')" class="metric-btn p-3 bg-gray-700 rounded border border-gray-600 hover:border-teal-400 text-white text-sm">
+                            ⚠️ Error Rate
+                        </button>
+                        <button onclick="selectMetric('retention')" class="metric-btn p-3 bg-gray-700 rounded border border-gray-600 hover:border-teal-400 text-white text-sm">
+                            🔄 Retention
+                        </button>
+                        <button onclick="selectMetric('engagement')" class="metric-btn p-3 bg-gray-700 rounded border border-gray-600 hover:border-teal-400 text-white text-sm">
+                            🎯 Engagement
+                        </button>
+                        <button onclick="selectMetric('conversion')" class="metric-btn p-3 bg-gray-700 rounded border border-gray-600 hover:border-teal-400 text-white text-sm">
+                            📈 Conversion
+                        </button>
+                        <button onclick="selectMetric('satisfaction')" class="metric-btn p-3 bg-gray-700 rounded border border-gray-600 hover:border-teal-400 text-white text-sm">
+                            ⭐ Satisfaction
+                        </button>
+                        <button onclick="selectMetric('latency')" class="metric-btn p-3 bg-gray-700 rounded border border-gray-600 hover:border-teal-400 text-white text-sm">
+                            ⚡ Latency
+                        </button>
+                        <button onclick="selectMetric('quality')" class="metric-btn p-3 bg-gray-700 rounded border border-gray-600 hover:border-teal-400 text-white text-sm">
+                            🎬 Quality Score
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Active Canvas Metrics -->
+                <div class="card p-4 rounded-lg border border-gray-600 shadow-sm mb-6">
+                    <h3 class="text-lg font-semibold mb-4 text-white">Active Canvas Metrics</h3>
+                    <div id="activeMetrics" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Default metrics will be added here -->
+                        <div class="metric-card border border-gray-600 rounded p-4 bg-gray-700">
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="font-semibold text-white">Active Users</h4>
+                                <button onclick="removeMetric(this)" class="text-red-400 hover:text-red-300">×</button>
+                            </div>
+                            <div class="text-2xl font-bold text-blue-400 mb-2">8,542</div>
+                            <canvas id="canvasMetric1" width="200" height="60"></canvas>
+                            <div class="flex justify-between text-xs text-gray-400 mt-1">
+                                <span>7d trend</span>
+                                <span class="text-green-400">+12%</span>
+                            </div>
+                        </div>
+                        <div class="metric-card border border-gray-600 rounded p-4 bg-gray-700">
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="font-semibold text-white">Revenue</h4>
+                                <button onclick="removeMetric(this)" class="text-red-400 hover:text-red-300">×</button>
+                            </div>
+                            <div class="text-2xl font-bold text-green-400 mb-2">$127.4K</div>
+                            <canvas id="canvasMetric2" width="200" height="60"></canvas>
+                            <div class="flex justify-between text-xs text-gray-400 mt-1">
+                                <span>7d trend</span>
+                                <span class="text-green-400">+8%</span>
+                            </div>
+                        </div>
+                        <div class="metric-card border border-gray-600 rounded p-4 bg-gray-700">
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="font-semibold text-white">Watch Hours</h4>
+                                <button onclick="removeMetric(this)" class="text-red-400 hover:text-red-300">×</button>
+                            </div>
+                            <div class="text-2xl font-bold text-purple-400 mb-2">45.2K</div>
+                            <canvas id="canvasMetric3" width="200" height="60"></canvas>
+                            <div class="flex justify-between text-xs text-gray-400 mt-1">
+                                <span>7d trend</span>
+                                <span class="text-green-400">+15%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Advanced Filters & Dimensions -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div class="card p-4 rounded-lg border border-gray-600 shadow-sm">
+                        <h3 class="text-lg font-semibold mb-4 text-white">Dimension Filters</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm text-gray-300 mb-1">Device Type</label>
+                                <select class="w-full border border-gray-600 rounded p-2 bg-gray-700 text-white">
+                                    <option>All Devices</option>
+                                    <option>Mobile</option>
+                                    <option>Desktop</option>
+                                    <option>TV</option>
+                                    <option>Tablet</option>
+                                    <option>Gaming Console</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-300 mb-1">Content Type</label>
+                                <select class="w-full border border-gray-600 rounded p-2 bg-gray-700 text-white">
+                                    <option>All Content</option>
+                                    <option>Movies</option>
+                                    <option>TV Shows</option>
+                                    <option>Live Sports</option>
+                                    <option>Documentaries</option>
+                                    <option>Kids Content</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-300 mb-1">Region</label>
+                                <select class="w-full border border-gray-600 rounded p-2 bg-gray-700 text-white">
+                                    <option>All Regions</option>
+                                    <option>North America</option>
+                                    <option>Europe</option>
+                                    <option>Asia Pacific</option>
+                                    <option>Latin America</option>
+                                    <option>Middle East</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-300 mb-1">Subscription Tier</label>
+                                <select class="w-full border border-gray-600 rounded p-2 bg-gray-700 text-white">
+                                    <option>All Tiers</option>
+                                    <option>Basic</option>
+                                    <option>Standard</option>
+                                    <option>Premium</option>
+                                    <option>Family</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card p-4 rounded-lg border border-gray-600 shadow-sm">
+                        <h3 class="text-lg font-semibold mb-4 text-white">Advanced Analytics</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm text-gray-300 mb-1">Comparison Period</label>
+                                <select class="w-full border border-gray-600 rounded p-2 bg-gray-700 text-white">
+                                    <option>Previous period</option>
+                                    <option>Same period last year</option>
+                                    <option>Custom comparison</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-300 mb-1">Statistical Analysis</label>
+                                <div class="flex gap-2">
+                                    <button class="flex-1 bg-gray-600 text-white px-3 py-2 rounded text-sm hover:bg-gray-500">Trend</button>
+                                    <button class="flex-1 bg-gray-600 text-white px-3 py-2 rounded text-sm hover:bg-gray-500">Correlation</button>
+                                    <button class="flex-1 bg-gray-600 text-white px-3 py-2 rounded text-sm hover:bg-gray-500">Anomaly</button>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-300 mb-1">Export Options</label>
+                                <div class="flex gap-2">
+                                    <button class="flex-1 bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700">CSV</button>
+                                    <button class="flex-1 bg-green-600 text-white px-3 py-2 rounded text-sm hover:bg-green-700">PDF</button>
+                                    <button class="flex-1 bg-purple-600 text-white px-3 py-2 rounded text-sm hover:bg-purple-700">Image</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Canvas Preview & Layout -->
+                <div class="card p-4 rounded-lg border border-gray-600 shadow-sm">
+                    <h3 class="text-lg font-semibold mb-4 text-white">Canvas Layout Preview</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                        <div class="text-center p-3 border-2 border-dashed border-gray-600 rounded cursor-pointer hover:border-teal-400">
+                            <div class="text-gray-400 text-2xl mb-1">+</div>
+                            <div class="text-xs text-gray-400">Drop metric here</div>
+                        </div>
+                        <div class="text-center p-3 border-2 border-dashed border-gray-600 rounded cursor-pointer hover:border-teal-400">
+                            <div class="text-gray-400 text-2xl mb-1">+</div>
+                            <div class="text-xs text-gray-400">Drop metric here</div>
+                        </div>
+                        <div class="text-center p-3 border-2 border-dashed border-gray-600 rounded cursor-pointer hover:border-teal-400">
+                            <div class="text-gray-400 text-2xl mb-1">+</div>
+                            <div class="text-xs text-gray-400">Drop metric here</div>
+                        </div>
+                        <div class="text-center p-3 border-2 border-dashed border-gray-600 rounded cursor-pointer hover:border-teal-400">
+                            <div class="text-gray-400 text-2xl mb-1">+</div>
+                            <div class="text-xs text-gray-400">Drop metric here</div>
+                        </div>
+                    </div>
+                    <div class="flex justify-center gap-4">
+                        <button class="bg-teal-600 text-white px-6 py-2 rounded hover:bg-teal-700">Apply Layout</button>
+                        <button class="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700">Reset Canvas</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Insights View -->
+            <div id="insights" class="view p-6 hidden">
+                <h2 class="text-2xl font-semibold mb-1 text-white">Insights Console</h2>
+                <p class="text-gray-300 mb-6">Query your data using natural language</p>
+
+                <div class="card p-4 rounded-lg border border-gray-600 shadow-sm mb-6">
+                    <h3 class="text-lg font-semibold mb-4 text-white">Text-to-SQL Query</h3>
+
+                    <!-- Suggested Questions -->
+                    <div class="mb-4">
+                        <p class="text-sm text-gray-300 mb-2">Try these example queries:</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4">
+                            <button onclick="runSuggestedQuery('revenue_trend')" class="suggested-query p-3 bg-gray-700 rounded border border-gray-600 hover:border-teal-400 text-left text-white text-sm transition-colors">
+                                📈 Show me revenue trends over the last 7 days
+                            </button>
+                            <button onclick="runSuggestedQuery('user_engagement')" class="suggested-query p-3 bg-gray-700 rounded border border-gray-600 hover:border-teal-400 text-left text-white text-sm transition-colors">
+                                👥 What are the top 5 most engaged user segments?
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Query Input -->
+                    <div class="mb-4">
+                        <input type="text" placeholder="Ask a question about your data..." class="w-full border border-gray-600 rounded p-3 bg-gray-700 text-white" id="queryInput">
+                        <button onclick="runQuery()" class="mt-2 bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700">Run Query</button>
+                    </div>
+
+                    <!-- Query Results -->
+                    <div id="queryResult" class="hidden">
+                        <div class="bg-gray-700 p-4 rounded mb-4">
+                            <h4 class="font-semibold text-white mb-2">Generated SQL Query:</h4>
+                            <pre class="text-green-400 text-sm font-mono bg-gray-800 p-3 rounded overflow-x-auto" id="generatedSQL"></pre>
+                        </div>
+                        <div class="bg-gray-700 p-4 rounded">
+                            <h4 class="font-semibold text-white mb-2">Query Results:</h4>
+                            <canvas id="queryChart" width="400" height="200"></canvas>
+                            <div class="mt-4 grid grid-cols-2 gap-4 text-sm">
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-blue-400" id="resultMetric1">0</div>
+                                    <div class="text-gray-300" id="resultLabel1">Total Records</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-green-400" id="resultMetric2">0</div>
+                                    <div class="text-gray-300" id="resultLabel2">Average Value</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card p-4 rounded-lg border border-gray-600 shadow-sm">
+                    <h3 class="text-lg font-semibold mb-4 text-white">Scenario Simulator</h3>
+                    <form class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm mb-1 text-white">Price Change %</label>
+                            <input type="number" value="5" class="border border-gray-600 rounded p-2 w-full bg-gray-700 text-white" id="priceChange">
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1 text-white">Marketing Boost %</label>
+                            <input type="number" value="10" class="border border-gray-600 rounded p-2 w-full bg-gray-700 text-white" id="marketingBoost">
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1 text-white">CDN Efficiency %</label>
+                            <input type="number" value="8" class="border border-gray-600 rounded p-2 w-full bg-gray-700 text-white" id="cdnEfficiency">
+                        </div>
+                    </form>
+                    <button onclick="runScenario()" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">Run Simulation</button>
+                    <div id="scenarioResult" class="mt-4 p-4 bg-gray-700 rounded hidden">
+                        <h4 class="font-semibold text-white">Simulation Results:</h4>
+                        <p class="text-white">Projected Revenue Impact: +$23,450 (18.4% increase)</p>
+                        <p class="text-white">User Retention Impact: +2.1% improvement</p>
+                        <p class="text-white">Churn Reduction: -0.8% decrease</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notifications View -->
+            <div id="notifications" class="view p-6 hidden">
+                <h2 class="text-2xl font-semibold mb-1 text-white">Notifications & Alerts</h2>
+                <p class="text-gray-300 mb-6">Intelligent alert management and automated notifications</p>
+
+                <!-- Alert Dashboard Overview -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div class="card p-4 rounded-lg border border-gray-600 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-lg font-semibold text-red-400">24</h3>
+                                <p class="text-sm text-gray-300">Active Alerts</p>
+                            </div>
+                            <div class="text-red-400 text-2xl">🚨</div>
+                        </div>
+                        <div class="mt-2 text-xs text-red-300">+3 from yesterday</div>
+                    </div>
+                    <div class="card p-4 rounded-lg border border-gray-600 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-lg font-semibold text-yellow-400">156</h3>
+                                <p class="text-sm text-gray-300">Warnings</p>
+                            </div>
+                            <div class="text-yellow-400 text-2xl">⚠️</div>
+                        </div>
+                        <div class="mt-2 text-xs text-yellow-300">-12% this week</div>
+                    </div>
+                    <div class="card p-4 rounded-lg border border-gray-600 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-lg font-semibold text-blue-400">89%</h3>
+                                <p class="text-sm text-gray-300">Resolution Rate</p>
+                            </div>
+                            <div class="text-blue-400 text-2xl">✅</div>
+                        </div>
+                        <div class="mt-2 text-xs text-blue-300">+5% from last month</div>
+                    </div>
+                    <div class="card p-4 rounded-lg border border-gray-600 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-lg font-semibold text-green-400">2.3m</h3>
+                                <p class="text-sm text-gray-300">Avg Response Time</p>
+                            </div>
+                            <div class="text-green-400 text-2xl">⚡</div>
+                        </div>
+                        <div class="mt-2 text-xs text-green-300">-0.4m improvement</div>
+                    </div>
+                </div>
+
+                <!-- Alert Management Controls -->
+                <div class="card p-4 rounded-lg border border-gray-600 shadow-sm mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-white">Alert Management</h3>
+                        <div class="flex gap-2">
+                            <button onclick="createAlertRule()" class="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700 text-sm">+ New Rule</button>
+                            <button onclick="bulkAction()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm">Bulk Actions</button>
+                            <button onclick="exportAlerts()" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 text-sm">Export</button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                        <div>
+                            <label class="block text-sm text-gray-300 mb-1">Filter by Priority</label>
+                            <select class="w-full border border-gray-600 rounded p-2 bg-gray-700 text-white text-sm">
+                                <option>All Priorities</option>
+                                <option>Critical</option>
+                                <option>High</option>
+                                <option>Medium</option>
+                                <option>Low</option>
+                                <option>Info</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-300 mb-1">Status</label>
+                            <select class="w-full border border-gray-600 rounded p-2 bg-gray-700 text-white text-sm">
+                                <option>All Status</option>
+                                <option>Active</option>
+                                <option>Acknowledged</option>
+                                <option>Resolved</option>
+                                <option>Suppressed</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-300 mb-1">Category</label>
+                            <select class="w-full border border-gray-600 rounded p-2 bg-gray-700 text-white text-sm">
+                                <option>All Categories</option>
+                                <option>System</option>
+                                <option>Performance</option>
+                                <option>Security</option>
+                                <option>Business</option>
+                                <option>Content</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-300 mb-1">Time Range</label>
+                            <select class="w-full border border-gray-600 rounded p-2 bg-gray-700 text-white text-sm">
+                                <option>Last 24 hours</option>
+                                <option>Last 7 days</option>
+                                <option>Last 30 days</option>
+                                <option>Custom</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-300 mb-1">Search</label>
+                            <input type="text" placeholder="Search alerts..." class="w-full border border-gray-600 rounded p-2 bg-gray-700 text-white text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Alerts List -->
+                <div class="card p-4 rounded-lg border border-gray-600 shadow-sm mb-6">
+                    <h3 class="text-lg font-semibold mb-4 text-white">Active Alerts</h3>
+                    <div class="space-y-3 max-h-96 overflow-y-auto">
+                        <!-- Critical Alerts -->
+                        <div class="alert-item border-l-4 border-red-500 bg-red-900/20 p-4 hover:bg-red-900/30 transition-colors cursor-pointer">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <h4 class="font-semibold text-white">Database Connection Failure</h4>
+                                        <span class="bg-red-900 text-red-300 px-2 py-1 rounded text-xs font-medium">CRITICAL</span>
+                                        <span class="bg-gray-700 text-gray-300 px-2 py-1 rounded text-xs">System</span>
+                                    </div>
+                                    <p class="text-sm text-gray-300 mb-2">Primary database cluster is unreachable. Automatic failover initiated.</p>
+                                    <div class="flex items-center gap-4 text-xs text-gray-400">
+                                        <span>🕐 2 minutes ago</span>
+                                        <span>👤 Auto-assigned</span>
+                                        <span>🔄 Retrying every 30s</span>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="bg-red-700 text-white px-3 py-1 rounded text-xs hover:bg-red-600">Acknowledge</button>
+                                    <button class="bg-gray-600 text-white px-3 py-1 rounded text-xs hover:bg-gray-500">Details</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert-item border-l-4 border-red-500 bg-red-900/20 p-4 hover:bg-red-900/30 transition-colors cursor-pointer">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <h4 class="font-semibold text-white">CDN Outage - Europe Region</h4>
+                                        <span class="bg-red-900 text-red-300 px-2 py-1 rounded text-xs font-medium">CRITICAL</span>
+                                        <span class="bg-gray-700 text-gray-300 px-2 py-1 rounded text-xs">Performance</span>
+                                    </div>
+                                    <p class="text-sm text-gray-300 mb-2">Content delivery network experiencing 100% failure rate in EU region. 2.3M users affected.</p>
+                                    <div class="flex items-center gap-4 text-xs text-gray-400">
+                                        <span>🕐 5 minutes ago</span>
+                                        <span>👤 ops-team@tcs.com</span>
+                                        <span>📍 Europe</span>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="bg-red-700 text-white px-3 py-1 rounded text-xs hover:bg-red-600">Escalate</button>
+                                    <button class="bg-gray-600 text-white px-3 py-1 rounded text-xs hover:bg-gray-500">Details</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- High Priority Alerts -->
+                        <div class="alert-item border-l-4 border-orange-500 bg-orange-900/20 p-4 hover:bg-orange-900/30 transition-colors cursor-pointer">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <h4 class="font-semibold text-white">Revenue Anomaly Detected</h4>
+                                        <span class="bg-orange-900 text-orange-300 px-2 py-1 rounded text-xs font-medium">HIGH</span>
+                                        <span class="bg-gray-700 text-gray-300 px-2 py-1 rounded text-xs">Business</span>
+                                    </div>
+                                    <p class="text-sm text-gray-300 mb-2">Hourly revenue dropped 45% below expected. Potential billing system issue.</p>
+                                    <div class="flex items-center gap-4 text-xs text-gray-400">
+                                        <span>🕐 12 minutes ago</span>
+                                        <span>👤 finance@tcs.com</span>
+                                        <span>💰 -$12,450 impact</span>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="bg-orange-700 text-white px-3 py-1 rounded text-xs hover:bg-orange-600">Investigate</button>
+                                    <button class="bg-gray-600 text-white px-3 py-1 rounded text-xs hover:bg-gray-500">Details</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Medium Priority Alerts -->
+                        <div class="alert-item border-l-4 border-yellow-500 bg-yellow-900/20 p-4 hover:bg-yellow-900/30 transition-colors cursor-pointer">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <h4 class="font-semibold text-white">High Memory Usage</h4>
+                                        <span class="bg-yellow-900 text-yellow-300 px-2 py-1 rounded text-xs font-medium">MEDIUM</span>
+                                        <span class="bg-gray-700 text-gray-300 px-2 py-1 rounded text-xs">System</span>
+                                    </div>
+                                    <p class="text-sm text-gray-300 mb-2">Application server memory usage at 87%. Performance may degrade soon.</p>
+                                    <div class="flex items-center gap-4 text-xs text-gray-400">
+                                        <span>🕐 23 minutes ago</span>
+                                        <span>👤 devops@tcs.com</span>
+                                        <span>🖥️ app-server-03</span>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="bg-yellow-700 text-white px-3 py-1 rounded text-xs hover:bg-yellow-600">Monitor</button>
+                                    <button class="bg-gray-600 text-white px-3 py-1 rounded text-xs hover:bg-gray-500">Details</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert-item border-l-4 border-yellow-500 bg-yellow-900/20 p-4 hover:bg-yellow-900/30 transition-colors cursor-pointer">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <h4 class="font-semibold text-white">Content Upload Queue Backlog</h4>
+                                        <span class="bg-yellow-900 text-yellow-300 px-2 py-1 rounded text-xs font-medium">MEDIUM</span>
+                                        <span class="bg-gray-700 text-gray-300 px-2 py-1 rounded text-xs">Content</span>
+                                    </div>
+                                    <p class="text-sm text-gray-300 mb-2">1,247 content files waiting in upload queue. Processing delayed by 2.3 hours.</p>
+                                    <div class="flex items-center gap-4 text-xs text-gray-400">
+                                        <span>🕐 34 minutes ago</span>
+                                        <span>👤 content@tcs.com</span>
+                                        <span>📁 1.2TB queued</span>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="bg-yellow-700 text-white px-3 py-1 rounded text-xs hover:bg-yellow-600">Review</button>
+                                    <button class="bg-gray-600 text-white px-3 py-1 rounded text-xs hover:bg-gray-500">Details</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Low Priority Alerts -->
+                        <div class="alert-item border-l-4 border-blue-500 bg-blue-900/20 p-4 hover:bg-blue-900/30 transition-colors cursor-pointer">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <h4 class="font-semibold text-white">SSL Certificate Expiring Soon</h4>
+                                        <span class="bg-blue-900 text-blue-300 px-2 py-1 rounded text-xs font-medium">LOW</span>
+                                        <span class="bg-gray-700 text-gray-300 px-2 py-1 rounded text-xs">Security</span>
+                                    </div>
+                                    <p class="text-sm text-gray-300 mb-2">SSL certificate for api.tcs.com expires in 14 days. Auto-renewal scheduled.</p>
+                                    <div class="flex items-center gap-4 text-xs text-gray-400">
+                                        <span>🕐 2 hours ago</span>
+                                        <span>👤 security@tcs.com</span>
+                                        <span>🔒 api.tcs.com</span>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="bg-blue-700 text-white px-3 py-1 rounded text-xs hover:bg-blue-600">Schedule</button>
+                                    <button class="bg-gray-600 text-white px-3 py-1 rounded text-xs hover:bg-gray-500">Details</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alert Analytics & Insights -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div class="card p-4 rounded-lg border border-gray-600 shadow-sm">
+                        <h3 class="text-lg font-semibold mb-4 text-white">Alert Trends</h3>
+                        <canvas id="alertTrendsChart" width="400" height="200"></canvas>
+                        <div class="mt-4 grid grid-cols-3 gap-4 text-center">
+                            <div>
+                                <div class="text-lg font-semibold text-red-400">+23%</div>
+                                <div class="text-xs text-gray-400">Critical Alerts</div>
+                            </div>
+                            <div>
+                                <div class="text-lg font-semibold text-yellow-400">-8%</div>
+                                <div class="text-xs text-gray-400">Warnings</div>
+                            </div>
+                            <div>
+                                <div class="text-lg font-semibold text-green-400">+15%</div>
+                                <div class="text-xs text-gray-400">Resolution Rate</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card p-4 rounded-lg border border-gray-600 shadow-sm">
+                        <h3 class="text-lg font-semibold mb-4 text-white">Top Alert Sources</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                                    <span class="text-sm text-white">Database Systems</span>
+                                </div>
+                                <div class="text-sm text-gray-300">42 alerts</div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3 h-3 bg-orange-500 rounded-full"></div>
+                                    <span class="text-sm text-white">CDN Network</span>
+                                </div>
+                                <div class="text-sm text-gray-300">28 alerts</div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                                    <span class="text-sm text-white">Application Servers</span>
+                                </div>
+                                <div class="text-sm text-gray-300">19 alerts</div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                                    <span class="text-sm text-white">Billing Systems</span>
+                                </div>
+                                <div class="text-sm text-gray-300">15 alerts</div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                    <span class="text-sm text-white">Content Pipeline</span>
+                                </div>
+                                <div class="text-sm text-gray-300">12 alerts</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notification Channels & Templates -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="card p-4 rounded-lg border border-gray-600 shadow-sm">
+                        <h3 class="text-lg font-semibold mb-4 text-white">Notification Channels</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-3 bg-gray-700 rounded">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 bg-blue-600 rounded flex items-center justify-center text-white text-sm">📧</div>
+                                    <div>
+                                        <div class="font-medium text-white">Email</div>
+                                        <div class="text-xs text-gray-400">ops@tcs.com, alerts@tcs.com</div>
+                                    </div>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" class="sr-only peer" checked>
+                                    <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                </label>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-gray-700 rounded">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 bg-purple-600 rounded flex items-center justify-center text-white text-sm">💬</div>
+                                    <div>
+                                        <div class="font-medium text-white">Slack</div>
+                                        <div class="text-xs text-gray-400">#alerts, #ops-critical</div>
+                                    </div>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" class="sr-only peer" checked>
+                                    <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                                </label>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-gray-700 rounded">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 bg-green-600 rounded flex items-center justify-center text-white text-sm">📱</div>
+                                    <div>
+                                        <div class="font-medium text-white">SMS</div>
+                                        <div class="text-xs text-gray-400">Critical alerts only</div>
+                                    </div>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                                </label>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-gray-700 rounded">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 bg-red-600 rounded flex items-center justify-center text-white text-sm">🚨</div>
+                                    <div>
+                                        <div class="font-medium text-white">PagerDuty</div>
+                                        <div class="text-xs text-gray-400">On-call rotation</div>
+                                    </div>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" class="sr-only peer" checked>
+                                    <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card p-4 rounded-lg border border-gray-600 shadow-sm">
+                        <h3 class="text-lg font-semibold mb-4 text-white">Alert Rules & Automation</h3>
+                        <div class="space-y-3">
+                            <div class="p-3 bg-gray-700 rounded">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-medium text-white text-sm">Auto-escalation</span>
+                                    <span class="bg-green-600 text-green-200 px-2 py-1 rounded text-xs">Active</span>
+                                </div>
+                                <p class="text-xs text-gray-400">Critical alerts auto-escalate after 5 minutes</p>
+                            </div>
+                            <div class="p-3 bg-gray-700 rounded">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-medium text-white text-sm">Smart Suppression</span>
+                                    <span class="bg-blue-600 text-blue-200 px-2 py-1 rounded text-xs">Active</span>
+                                </div>
+                                <p class="text-xs text-gray-400">Duplicate alerts suppressed for 15 minutes</p>
+                            </div>
+                            <div class="p-3 bg-gray-700 rounded">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-medium text-white text-sm">Maintenance Mode</span>
+                                    <span class="bg-yellow-600 text-yellow-200 px-2 py-1 rounded text-xs">Scheduled</span>
+                                </div>
+                                <p class="text-xs text-gray-400">System maintenance: Mar 31, 2:00-4:00 AM</p>
+                            </div>
+                            <div class="p-3 bg-gray-700 rounded">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-medium text-white text-sm">Alert Correlation</span>
+                                    <span class="bg-purple-600 text-purple-200 px-2 py-1 rounded text-xs">Active</span>
+                                </div>
+                                <p class="text-xs text-gray-400">AI-powered alert grouping and correlation</p>
+                            </div>
+                        </div>
+                        <button class="mt-4 w-full bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700 text-sm">Configure Rules</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Widget -->
+    <div id="chatWidget" class="chat-widget hidden">
+        <div class="chat-header">
+            <h3 class="font-semibold">AI Assistant</h3>
+            <button onclick="toggleChat()" class="text-white hover:text-gray-200">✕</button>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot">
+                <p>Hello! I'm your AI assistant for TCS Analytics. How can I help you today?</p>
+            </div>
+        </div>
+        <div class="chat-input">
+            <div class="flex gap-2">
+                <input type="text" placeholder="Ask me anything..." class="flex-1 border border-gray-600 rounded p-2 bg-gray-700 text-white" id="chatInput">
+                <button onclick="sendMessage()" class="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Toggle Button -->
+    <button onclick="toggleChat()" class="fixed bottom-4 right-4 bg-teal-600 text-white p-3 rounded-full shadow-lg hover:bg-teal-700 z-50">
+        💬
+    </button>
+
+    <script>
+        // Navigation
+        function showView(viewId) {
+            document.querySelectorAll('.view').forEach(view => view.classList.add('hidden'));
+            document.getElementById(viewId).classList.remove('hidden');
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        // Chat functionality
+        function toggleChat() {
+            const widget = document.getElementById('chatWidget');
+            widget.classList.toggle('hidden');
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const messages = document.getElementById('chatMessages');
+
+            if (input.value.trim()) {
+                // Add user message
+                const userMessage = document.createElement('div');
+                userMessage.className = 'message user';
+                userMessage.innerHTML = `<p>${input.value}</p>`;
+                messages.appendChild(userMessage);
+
+                // Simulate bot response
+                setTimeout(() => {
+                    const botMessage = document.createElement('div');
+                    botMessage.className = 'message bot';
+                    botMessage.innerHTML = `<p>${getBotResponse(input.value)}</p>`;
+                    messages.appendChild(botMessage);
+                    messages.scrollTop = messages.scrollHeight;
+                }, 1000);
+
+                input.value = '';
+                messages.scrollTop = messages.scrollHeight;
+            }
+        }
+
+        function getBotResponse(userMessage) {
+            const responses = {
+                'hello': 'Hello! How can I help you with your analytics today?',
+                'revenue': 'Based on current data, monthly revenue is $127,450 with an 8% increase from last month.',
+                'users': 'We currently have 8,542 active users, showing a 12% growth from last week.',
+                'performance': 'Playback quality is excellent with 0.8% rebuffer rate and 0.2% fatal errors.',
+                'help': 'I can help you with KPIs, trends, queries, and insights. Try asking about revenue, users, or performance!',
+                'default': 'I understand you\'re asking about: "' + userMessage + '". For detailed analytics, please check the dashboard views or try a specific query.'
+            };
+
+            const lowerMessage = userMessage.toLowerCase();
+            for (const [key, response] of Object.entries(responses)) {
+                if (lowerMessage.includes(key)) {
+                    return response;
+                }
+            }
+            return responses.default;
+        }
+
+        // Query functionality
+        function runQuery() {
+            const input = document.getElementById('queryInput');
+            if (input.value.trim()) {
+                // Simulate processing
+                showNotification('Processing your query...', 'info');
+
+                setTimeout(() => {
+                    const resultDiv = document.getElementById('queryResult');
+                    resultDiv.classList.remove('hidden');
+
+                    // Generate sample SQL based on input
+                    const sql = generateSQLFromText(input.value);
+                    document.getElementById('generatedSQL').textContent = sql;
+
+                    // Update metrics
+                    document.getElementById('resultMetric1').textContent = Math.floor(Math.random() * 10000) + 1000;
+                    document.getElementById('resultLabel1').textContent = 'Total Records';
+                    document.getElementById('resultMetric2').textContent = (Math.random() * 1000 + 500).toFixed(2);
+                    document.getElementById('resultLabel2').textContent = 'Average Value';
+
+                    // Render chart
+                    renderQueryChart();
+
+                    showNotification('Query executed successfully!', 'success');
+                }, 1500);
+            }
+        }
+
+        function runSuggestedQuery(queryType) {
+            const queries = {
+                'revenue_trend': {
+                    question: 'Show me revenue trends over the last 7 days',
+                    sql: `SELECT
+    DATE_TRUNC('day', created_at) as date,
+    SUM(amount) as daily_revenue,
+    COUNT(DISTINCT user_id) as unique_users
+FROM revenue_events
+WHERE created_at >= CURRENT_DATE - INTERVAL '7 days'
+GROUP BY DATE_TRUNC('day', created_at)
+ORDER BY date DESC;`,
+                    chartType: 'line',
+                    metric1: '127,450',
+                    label1: 'Total Revenue ($)',
+                    metric2: '8,542',
+                    label2: 'Unique Users'
+                },
+                'user_engagement': {
+                    question: 'What are the top 5 most engaged user segments?',
+                    sql: `SELECT
+    user_segment,
+    AVG(session_duration) as avg_session_time,
+    COUNT(*) as total_sessions,
+    SUM(page_views) as total_page_views
+FROM user_sessions
+WHERE session_date >= CURRENT_DATE - INTERVAL '30 days'
+GROUP BY user_segment
+ORDER BY avg_session_time DESC
+LIMIT 5;`,
+                    chartType: 'bar',
+                    metric1: '2,847',
+                    label1: 'Total Sessions',
+                    metric2: '24.5m',
+                    label2: 'Avg Session (min)'
+                }
+            };
+
+            const query = queries[queryType];
+            if (query) {
+                // Set the input value
+                document.getElementById('queryInput').value = query.question;
+
+                // Show processing notification
+                showNotification('Processing suggested query...', 'info');
+
+                setTimeout(() => {
+                    const resultDiv = document.getElementById('queryResult');
+                    resultDiv.classList.remove('hidden');
+
+                    // Set SQL
+                    document.getElementById('generatedSQL').textContent = query.sql;
+
+                    // Update metrics
+                    document.getElementById('resultMetric1').textContent = query.metric1;
+                    document.getElementById('resultLabel1').textContent = query.label1;
+                    document.getElementById('resultMetric2').textContent = query.metric2;
+                    document.getElementById('resultLabel2').textContent = query.label2;
+
+                    // Render chart based on type
+                    renderQueryChart(query.chartType);
+
+                    showNotification('Query executed successfully!', 'success');
+                }, 1500);
+            }
+        }
+
+        function generateSQLFromText(text) {
+            // Simple SQL generation based on keywords
+            const lowerText = text.toLowerCase();
+
+            if (lowerText.includes('revenue') && lowerText.includes('trend')) {
+                return `SELECT DATE_TRUNC('day', created_at) as date, SUM(amount) as revenue
+FROM transactions
+WHERE created_at >= CURRENT_DATE - INTERVAL '7 days'
+GROUP BY DATE_TRUNC('day', created_at)
+ORDER BY date;`;
+            } else if (lowerText.includes('user') && lowerText.includes('engagement')) {
+                return `SELECT user_id, COUNT(*) as sessions, AVG(duration) as avg_duration
+FROM user_sessions
+WHERE created_at >= CURRENT_DATE - INTERVAL '30 days'
+GROUP BY user_id
+ORDER BY sessions DESC
+LIMIT 10;`;
+            } else {
+                return `SELECT * FROM analytics_data
+WHERE created_at >= CURRENT_DATE - INTERVAL '1 day'
+ORDER BY created_at DESC
+LIMIT 100;`;
+            }
+        }
+
+        function renderQueryChart(chartType = 'bar') {
+            const canvas = document.getElementById('queryChart');
+            const ctx = canvas.getContext('2d');
+
+            // Destroy existing chart if it exists
+            if (window.currentQueryChart) {
+                window.currentQueryChart.destroy();
+            }
+
+            let chartConfig;
+
+            if (chartType === 'bar') {
+                chartConfig = {
+                    type: 'bar',
+                    data: {
+                        labels: ['Premium', 'Standard', 'Basic', 'Free', 'Enterprise'],
+                        datasets: [{
+                            label: 'Average Session Time (minutes)',
+                            data: [45, 32, 18, 8, 67],
+                            backgroundColor: [
+                                'rgba(16, 185, 129, 0.8)',
+                                'rgba(59, 130, 246, 0.8)',
+                                'rgba(245, 158, 11, 0.8)',
+                                'rgba(239, 68, 68, 0.8)',
+                                'rgba(147, 51, 234, 0.8)'
+                            ],
+                            borderColor: [
+                                'rgb(16, 185, 129)',
+                                'rgb(59, 130, 246)',
+                                'rgb(245, 158, 11)',
+                                'rgb(239, 68, 68)',
+                                'rgb(147, 51, 234)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#f9fafb'
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                ticks: {
+                                    color: '#f9fafb'
+                                },
+                                grid: {
+                                    color: '#4b5563'
+                                },
+                                beginAtZero: true
+                            },
+                            x: {
+                                ticks: {
+                                    color: '#f9fafb'
+                                },
+                                grid: {
+                                    color: '#4b5563'
+                                }
+                            }
+                        }
+                    }
+                };
+            } else {
+                chartConfig = {
+                    type: 'line',
+                    data: {
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        datasets: [{
+                            label: 'Daily Revenue ($)',
+                            data: [12500, 13200, 11800, 14100, 13500, 15200, 13800],
+                            borderColor: 'rgb(16, 185, 129)',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#f9fafb'
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                ticks: {
+                                    color: '#f9fafb'
+                                },
+                                grid: {
+                                    color: '#4b5563'
+                                },
+                                beginAtZero: true
+                            },
+                            x: {
+                                ticks: {
+                                    color: '#f9fafb'
+                                },
+                                grid: {
+                                    color: '#4b5563'
+                                }
+                            }
+                        }
+                    }
+                };
+            }
+
+            window.currentQueryChart = new Chart(ctx, chartConfig);
+        }
+
+        // Scenario simulation
+        function runScenario() {
+            const resultDiv = document.getElementById('scenarioResult');
+            resultDiv.classList.remove('hidden');
+        }
+
+        // Enter key for chat
+        document.getElementById('chatInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Charts initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            // Revenue Chart
+            const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+            new Chart(revenueCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Revenue ($)',
+                        data: [12500, 13200, 11800, 14100, 13500, 15200, 13800],
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#f9fafb'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: '#f9fafb'
+                            },
+                            grid: {
+                                color: '#4b5563'
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                color: '#f9fafb'
+                            },
+                            grid: {
+                                color: '#4b5563'
+                            },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Activity Chart
+            const activityCtx = document.getElementById('activityChart').getContext('2d');
+            new Chart(activityCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+                    datasets: [{
+                        label: 'Active Users',
+                        data: [1200, 800, 2100, 3200, 4100, 3800],
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#f9fafb'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: '#f9fafb'
+                            },
+                            grid: {
+                                color: '#4b5563'
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                color: '#f9fafb'
+                            },
+                            grid: {
+                                color: '#4b5563'
+                            },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Streams Chart
+            const streamsCtx = document.getElementById('streamsChart').getContext('2d');
+            new Chart(streamsCtx, {
+                type: 'line',
+                data: {
+                    labels: ['10:00', '10:30', '11:00', '11:30', '12:00', '12:30'],
+                    datasets: [{
+                        label: 'Concurrent Streams',
+                        data: [2400, 2650, 2800, 2950, 2847, 2750],
+                        borderColor: 'rgb(255, 99, 132)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: false,
+                    maintainAspectRatio: false,
+                    width: 330,
+                    height: 300,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#f9fafb'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: '#f9fafb'
+                            },
+                            grid: {
+                                color: '#4b5563'
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                color: '#f9fafb'
+                            },
+                            grid: {
+                                color: '#4b5563'
+                            },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Bandwidth Chart
+            const bandwidthCtx = document.getElementById('bandwidthChart').getContext('2d');
+            new Chart(bandwidthCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Video', 'Audio', 'Metadata', 'Ads'],
+                    datasets: [{
+                        data: [850, 120, 80, 150],
+                        backgroundColor: [
+                            'rgb(255, 99, 132)',
+                            'rgb(54, 162, 235)',
+                            'rgb(255, 205, 86)',
+                            'rgb(75, 192, 192)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: false,
+                    maintainAspectRatio: false,
+                    width: 330,
+                    height: 300,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#f9fafb'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Benchmark Chart
+            const benchmarkCtx = document.getElementById('benchmarkChart').getContext('2d');
+            new Chart(benchmarkCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['Startup Time', 'Rebuffer Rate', 'Error Rate', 'Bitrate', 'Latency'],
+                    datasets: [{
+                        label: 'Current Performance',
+                        data: [85, 92, 88, 78, 82],
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)'
+                    }, {
+                        label: 'Industry Benchmark',
+                        data: [80, 85, 90, 75, 78],
+                        borderColor: 'rgb(255, 99, 132)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)'
+                    }]
+                },
+                options: {
+                    responsive: false,
+                    maintainAspectRatio: false,
+                    width: 330,
+                    height: 300,
+                    scales: {
+                        r: {
+                            ticks: {
+                                color: '#f9fafb'
+                            },
+                            grid: {
+                                color: '#4b5563'
+                            },
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+
+            // Device Distribution Chart
+            const deviceCtx = document.getElementById('deviceChart').getContext('2d');
+            new Chart(deviceCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Mobile', 'Desktop', 'TV', 'Tablet', 'Gaming Console'],
+                    datasets: [{
+                        data: [45, 28, 15, 8, 4],
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.8)',
+                            'rgba(59, 130, 246, 0.8)',
+                            'rgba(245, 158, 11, 0.8)',
+                            'rgba(239, 68, 68, 0.8)',
+                            'rgba(147, 51, 234, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgb(16, 185, 129)',
+                            'rgb(59, 130, 246)',
+                            'rgb(245, 158, 11)',
+                            'rgb(239, 68, 68)',
+                            'rgb(147, 51, 234)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: false,
+                    maintainAspectRatio: false,
+                    width: 330,
+                    height: 300,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#f9fafb'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Content Type Mix Chart
+            const contentCtx = document.getElementById('contentChart').getContext('2d');
+            new Chart(contentCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Movies', 'TV Shows', 'Live Sports', 'Documentaries', 'Kids Content'],
+                    datasets: [{
+                        data: [35, 28, 20, 12, 5],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.8)',
+                            'rgba(54, 162, 235, 0.8)',
+                            'rgba(255, 205, 86, 0.8)',
+                            'rgba(75, 192, 192, 0.8)',
+                            'rgba(153, 102, 255, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgb(255, 99, 132)',
+                            'rgb(54, 162, 235)',
+                            'rgb(255, 205, 86)',
+                            'rgb(75, 192, 192)',
+                            'rgb(153, 102, 255)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: false,
+                    maintainAspectRatio: false,
+                    width: 330,
+                    height: 300,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#f9fafb'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Quality Metrics Over Time Chart
+            const qualityCtx = document.getElementById('qualityChart').getContext('2d');
+            new Chart(qualityCtx, {
+                type: 'line',
+                data: {
+                    labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+                    datasets: [{
+                        label: 'Bitrate (Mbps)',
+                        data: [4.2, 4.8, 5.1, 4.9, 5.3, 4.7],
+                        borderColor: 'rgb(16, 185, 129)',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }, {
+                        label: 'Rebuffer Rate (%)',
+                        data: [0.8, 0.5, 0.3, 0.6, 0.4, 0.7],
+                        borderColor: 'rgb(239, 68, 68)',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: false,
+                    maintainAspectRatio: false,
+                    width: 330,
+                    height: 300,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#f9fafb'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: '#f9fafb'
+                            },
+                            grid: {
+                                color: '#4b5563'
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                color: '#f9fafb'
+                            },
+                            grid: {
+                                color: '#4b5563'
+                            },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Cohort/Retention Trends Chart
+            const cohortCtx = document.getElementById('cohortChart').getContext('2d');
+            new Chart(cohortCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Day 1', 'Day 7', 'Day 14', 'Day 30', 'Day 60', 'Day 90'],
+                    datasets: [{
+                        label: 'Premium Users',
+                        data: [100, 85, 78, 72, 68, 65],
+                        borderColor: 'rgb(16, 185, 129)',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }, {
+                        label: 'Standard Users',
+                        data: [100, 75, 65, 55, 48, 42],
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }, {
+                        label: 'Basic Users',
+                        data: [100, 60, 45, 35, 28, 22],
+                        borderColor: 'rgb(245, 158, 11)',
+                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#f9fafb'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: '#f9fafb'
+                            },
+                            grid: {
+                                color: '#4b5563'
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                color: '#f9fafb'
+                            },
+                            grid: {
+                                color: '#4b5563'
+                            },
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+
+            // Metric Charts
+            const metric1Ctx = document.getElementById('metric1').getContext('2d');
+            new Chart(metric1Ctx, {
+                type: 'line',
+                data: {
+                    labels: ['D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7'],
+                    datasets: [{
+                        data: [8200, 8350, 8100, 8400, 8250, 8500, 8542],
+                        borderColor: 'rgb(54, 162, 235)',
+                        borderWidth: 2,
+                        fill: false,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: false
+                        },
+                        y: {
+                            display: false
+                        }
+                    },
+                    elements: {
+                        point: {
+                            radius: 0
+                        }
+                    }
+                }
+            });
+
+            const metric2Ctx = document.getElementById('metric2').getContext('2d');
+            new Chart(metric2Ctx, {
+                type: 'line',
+                data: {
+                    labels: ['D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7'],
+                    datasets: [{
+                        data: [115000, 118000, 122000, 119000, 124000, 126000, 127450],
+                        borderColor: 'rgb(75, 192, 192)',
+                        borderWidth: 2,
+                        fill: false,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: false
+                        },
+                        y: {
+                            display: false
+                        }
+                    },
+                    elements: {
+                        point: {
+                            radius: 0
+                        }
+                    }
+                }
+            });
+
+            const metric3Ctx = document.getElementById('metric3').getContext('2d');
+            new Chart(metric3Ctx, {
+                type: 'line',
+                data: {
+                    labels: ['D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7'],
+                    datasets: [{
+                        data: [42000, 43500, 41800, 44200, 43800, 45100, 45230],
+                        borderColor: 'rgb(255, 99, 132)',
+                        borderWidth: 2,
+                        fill: false,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: false
+                        },
+                        y: {
+                            display: false
+                        }
+                    },
+                    elements: {
+                        point: {
+                            radius: 0
+                        }
+                    }
+                }
+            });
+        });
+
+        // Metric Canvas Functions
+        function addMetric() {
+            const metricNames = ['Active Users', 'Revenue', 'Watch Hours', 'Streams', 'Bandwidth', 'Error Rate', 'Retention', 'Engagement'];
+            const randomMetric = metricNames[Math.floor(Math.random() * metricNames.length)];
+            const metricId = 'canvasMetric' + (document.querySelectorAll('.metric-card').length + 1);
+
+            const metricCard = document.createElement('div');
+            metricCard.className = 'metric-card border border-gray-600 rounded p-4 bg-gray-700';
+            metricCard.innerHTML = `
+                <div class="flex items-center justify-between mb-2">
+                    <h4 class="font-semibold text-white">${randomMetric}</h4>
+                    <button onclick="removeMetric(this)" class="text-red-400 hover:text-red-300">×</button>
+                </div>
+                <div class="text-2xl font-bold text-blue-400 mb-2">${Math.floor(Math.random() * 10000)}</div>
+                <canvas id="${metricId}" width="200" height="60"></canvas>
+                <div class="flex justify-between text-xs text-gray-400 mt-1">
+                    <span>7d trend</span>
+                    <span class="text-green-400">+${Math.floor(Math.random() * 20)}%</span>
+                </div>
+            `;
+
+            document.getElementById('activeMetrics').appendChild(metricCard);
+            renderSparkline(metricId);
+        }
+
+        function removeMetric(button) {
+            button.closest('.metric-card').remove();
+        }
+
+        function selectMetric(metricType) {
+            const metricNames = {
+                'active_users': 'Active Users',
+                'revenue': 'Revenue',
+                'watch_hours': 'Watch Hours',
+                'streams': 'Streams',
+                'bandwidth': 'Bandwidth',
+                'errors': 'Error Rate',
+                'retention': 'Retention',
+                'engagement': 'Engagement'
+            };
+
+            const metricName = metricNames[metricType];
+            const metricId = 'canvasMetric' + (document.querySelectorAll('.metric-card').length + 1);
+
+            const metricCard = document.createElement('div');
+            metricCard.className = 'metric-card border border-gray-600 rounded p-4 bg-gray-700';
+            metricCard.innerHTML = `
+                <div class="flex items-center justify-between mb-2">
+                    <h4 class="font-semibold text-white">${metricName}</h4>
+                    <button onclick="removeMetric(this)" class="text-red-400 hover:text-red-300">×</button>
+                </div>
+                <div class="text-2xl font-bold text-teal-400 mb-2">${getRandomValue(metricType)}</div>
+                <canvas id="${metricId}" width="200" height="60"></canvas>
+                <div class="flex justify-between text-xs text-gray-400 mt-1">
+                    <span>7d trend</span>
+                    <span class="text-green-400">+${Math.floor(Math.random() * 20)}%</span>
+                </div>
+            `;
+
+            document.getElementById('activeMetrics').appendChild(metricCard);
+            renderSparkline(metricId);
+        }
+
+        function getRandomValue(type) {
+            const values = {
+                'active_users': Math.floor(Math.random() * 10000) + 5000,
+                'revenue': '$' + (Math.floor(Math.random() * 200) + 50) + 'K',
+                'watch_hours': (Math.floor(Math.random() * 100) + 20) + 'K',
+                'streams': Math.floor(Math.random() * 50000) + 10000,
+                'bandwidth': (Math.floor(Math.random() * 500) + 100) + 'GB',
+                'errors': (Math.random() * 5).toFixed(2) + '%',
+                'retention': (Math.random() * 20 + 80).toFixed(1) + '%',
+                'engagement': (Math.random() * 30 + 60).toFixed(1) + '%'
+            };
+            return values[type] || Math.floor(Math.random() * 1000);
+        }
+
+        function saveCanvas() {
+            const metrics = Array.from(document.querySelectorAll('.metric-card h4')).map(h4 => h4.textContent);
+            localStorage.setItem('savedCanvas', JSON.stringify(metrics));
+            showNotification('Canvas saved successfully!', 'success');
+        }
+
+        function loadCanvas() {
+            const saved = localStorage.getItem('savedCanvas');
+            if (saved) {
+                const metrics = JSON.parse(saved);
+                document.getElementById('activeMetrics').innerHTML = '';
+                metrics.forEach(metric => {
+                    const metricId = 'canvasMetric' + (document.querySelectorAll('.metric-card').length + 1);
+                    const metricCard = document.createElement('div');
+                    metricCard.className = 'metric-card border border-gray-600 rounded p-4 bg-gray-700';
+                    metricCard.innerHTML = `
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-semibold text-white">${metric}</h4>
+                            <button onclick="removeMetric(this)" class="text-red-400 hover:text-red-300">×</button>
+                        </div>
+                        <div class="text-2xl font-bold text-teal-400 mb-2">${Math.floor(Math.random() * 10000)}</div>
+                        <canvas id="${metricId}" width="200" height="60"></canvas>
+                        <div class="flex justify-between text-xs text-gray-400 mt-1">
+                            <span>7d trend</span>
+                            <span class="text-green-400">+${Math.floor(Math.random() * 20)}%</span>
+                        </div>
+                    `;
+                    document.getElementById('activeMetrics').appendChild(metricCard);
+                    renderSparkline(metricId);
+                });
+                showNotification('Canvas loaded successfully!', 'success');
+            } else {
+                showNotification('No saved canvas found.', 'warning');
+            }
+        }
+
+        function renderSparkline(canvasId) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            const data = Array.from({length: 14}, () => Math.floor(Math.random() * 100) + 20);
+
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw sparkline
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+
+            const width = canvas.width;
+            const height = canvas.height;
+            const maxVal = Math.max(...data);
+            const minVal = Math.min(...data);
+            const range = maxVal - minVal || 1;
+
+            data.forEach((value, index) => {
+                const x = (index / (data.length - 1)) * width;
+                const y = height - ((value - minVal) / range) * (height - 10) - 5;
+
+                if (index === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+
+            ctx.stroke();
+
+            // Add gradient fill
+            ctx.fillStyle = 'rgba(16, 185, 129, 0.1)';
+            ctx.beginPath();
+            ctx.moveTo(0, height);
+            data.forEach((value, index) => {
+                const x = (index / (data.length - 1)) * width;
+                const y = height - ((value - minVal) / range) * (height - 10) - 5;
+                ctx.lineTo(x, y);
+            });
+            ctx.lineTo(width, height);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // Initialize sparklines for default metrics
+        renderSparkline('canvasMetric1');
+        renderSparkline('canvasMetric2');
+        renderSparkline('canvasMetric3');
+
+        // Notification Functions
+        function createAlertRule() {
+            showNotification('Alert rule creation dialog would open here', 'info');
+        }
+
+        function bulkAction() {
+            showNotification('Bulk actions dialog would open here', 'info');
+        }
+
+        function exportAlerts() {
+            showNotification('Exporting alerts to CSV...', 'success');
+            setTimeout(() => {
+                showNotification('Alerts exported successfully!', 'success');
+            }, 2000);
+        }
+
+        // Initialize Alert Trends Chart
+        const alertTrendsCtx = document.getElementById('alertTrendsChart').getContext('2d');
+        new Chart(alertTrendsCtx, {
+            type: 'line',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [{
+                    label: 'Critical Alerts',
+                    data: [12, 15, 8, 22, 18, 25, 16],
+                    borderColor: 'rgb(239, 68, 68)',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }, {
+                    label: 'High Priority',
+                    data: [8, 12, 15, 18, 14, 20, 11],
+                    borderColor: 'rgb(249, 115, 22)',
+                    backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }, {
+                    label: 'Medium Priority',
+                    data: [25, 28, 22, 35, 30, 38, 24],
+                    borderColor: 'rgb(234, 179, 8)',
+                    backgroundColor: 'rgba(234, 179, 8, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#f9fafb'
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            color: '#f9fafb'
+                        },
+                        grid: {
+                            color: '#4b5563'
+                        }
+                    },
+                    y: {
+                        ticks: {
+                            color: '#f9fafb'
+                        },
+                        grid: {
+                            color: '#4b5563'
+                        },
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Notification function
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
+                type === 'success' ? 'bg-green-600' :
+                type === 'warning' ? 'bg-yellow-600' :
+                type === 'error' ? 'bg-red-600' : 'bg-blue-600'
+            } text-white`;
+            notification.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <span>${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">×</button>
+                </div>
+            `;
+
+            document.body.appendChild(notification);
+
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
